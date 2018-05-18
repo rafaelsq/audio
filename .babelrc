@@ -1,0 +1,4 @@
+{
+    "presets": [["env", {targets: {browsers: ["> 10%"]}}]],
+    "plugins": [["transform-react-jsx", {"pragma": "h"}]]
+}

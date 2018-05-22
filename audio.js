@@ -1,10 +1,8 @@
 export default function() {
     const _default = {
-        artist: null,
-        title: null,
-        src: null,
-
         autoplay: false,
+        seekTo: 0,
+
         buffered: [],
         currentTime: 0,
         duration: 0,
@@ -12,24 +10,40 @@ export default function() {
         progress: 0,
         ready: false,
         waiting: null,
-        volume: 0.6,
+        volume: 0.01,
+        muted: false,
     }
 
     const _audio = new Audio()
     _audio.preload = 'metadata'
+    _audio.volume = _default.volume
 
     let _state = Object.assign({}, _default)
 
-    function set(src) {
+    function src(src) {
+        _reset()
         _audio.src = src
     }
 
     function up(state) {
         Object.assign(_state, state)
+        if (_state.fn) _state.fn(state)
+    }
+
+    function on(fn) {
+        _state.fn = fn
     }
 
     function play() {
-        if (_state.ready) _audio.play()
+        if (_state.ready) {
+            const promise = _audio.play()
+            if (promise) {
+                promise.then(function() {}).catch(function(err) {
+                    up({playing: false})
+                    console.log(' play.err', err)
+                })
+            }
+        } else up({autoplay: true})
     }
 
     function pause() {
@@ -45,15 +59,19 @@ export default function() {
         up({autoplay: false})
     }
 
-    function seek(to) {
-        if (_state.ready) _audio.currentTime = to
+    function seek(seekTo) {
+        if (_state.ready) _audio.currentTime = _audio.duration * seekTo / 100
+        else up({seekTo})
     }
 
     function volume(value) {
+        if (value !== _audio.volume && _state.muted) toggleMute()
         _audio.volume = value
     }
 
-    function _shouldAutoplay() {
+    function _onReady() {
+        console.log(' onReady', _state.seekTo, _state.autoplay)
+        if (_state.seekTo) seek(_state.seekTo)
         if (_state.autoplay) play()
     }
 
@@ -78,11 +96,14 @@ export default function() {
         return secs
     }
 
+    function toggleMute() {
+        _audio.muted = !_audio.muted
+    }
+
     _audio.addEventListener('abort', () => console.log('abort'))
     _audio.addEventListener('canplay', () => {
-        up({playing: false, waiting: false})
         console.log('*canplay enought to start')
-        _shouldAutoplay()
+        up({playing: false, waiting: false})
     })
     _audio.addEventListener('canplaythrought', () => console.log('canplaythrought; all loaded'))
     _audio.addEventListener('durationchange', () => {
@@ -103,6 +124,7 @@ export default function() {
     _audio.addEventListener('loadeddata', () => console.log('loadeddata'))
     _audio.addEventListener('loadedmetadata', () => {
         up({ready: true})
+        _onReady()
         console.log('*loadedmetadata')
     })
     _audio.addEventListener('loadstart', () => {
@@ -134,7 +156,7 @@ export default function() {
     })
     _audio.addEventListener('volumechange', () => {
         console.log('*volumechange', _audio.volume)
-        up({volume: _audio.volume})
+        up({volume: _audio.volume, muted: _audio.muted})
     })
     _audio.addEventListener('waiting', () => {
         up({waiting: true})
@@ -146,7 +168,10 @@ export default function() {
         pause,
         stop,
         seek,
-        set,
+        src,
         volume,
+        on,
+        toggleMute,
+        state: () => _state,
     }
 }

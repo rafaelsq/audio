@@ -1,5 +1,5 @@
 import {h, app} from 'hyperapp'
-import audio from './audio'
+import Wdio from './audio'
 
 // parcel hmr
 if (module.hot) {
@@ -68,131 +68,60 @@ const State = {
 
 const Actions = {
     up: params => () => params,
-    reset: () => ({audio}) => Object.assign({}, State, {audio}),
-    shouldAutoplay: () => ({autoplay}, {play}) => {
-        if (autoplay) play()
-    },
-    initAudio: audio => ({volume}, {up, progress, reset, shouldAutoplay}) => {
-        const buf = (duration, buffered) => {
-            let secs = Array(duration | 0).fill(0)
-            for (let i = 0; i < buffered.length; i++) {
-                for (let x = buffered.start(i) | 0; x < buffered.end(i) | 0; x++) {
-                    secs[x] = 1
-                }
-            }
-            return secs
-        }
-
-        audio.addEventListener('abort', () => console.log('abort'))
-        audio.addEventListener('canplay', () => {
-            up({playing: false, waiting: false})
-            console.log('*canplay enought to start')
-            shouldAutoplay()
-        })
-        audio.addEventListener('canplaythrought', () => console.log('canplaythrought; all loaded'))
-        audio.addEventListener('durationchange', () => {
-            up({duration: audio.duration, buffered: buf(audio.duration, audio.buffered)})
-        })
-        audio.addEventListener('emptied', () => {
-            console.log('emptied')
-        })
-        audio.addEventListener('ended', () => {
-            console.log('*ended')
-            reset()
-        })
-        audio.addEventListener('error', err => {
-            reset()
-            console.error('*err', err)
-        })
-        audio.addEventListener('loadeddata', () => console.log('loadeddata'))
-        audio.addEventListener('loadedmetadata', () => {
-            up({ready: true})
-            console.log('*loadedmetadata')
-        })
-        audio.addEventListener('loadstart', () => {
-            up({waiting: true})
-            console.log('*loadstart')
-        })
-        audio.addEventListener('pause', () => {
-            up({playing: false})
-            console.log('*pause')
-        })
-        audio.addEventListener('play', () => console.log('play'))
-        audio.addEventListener('playing', () => {
-            console.log('*playing')
-            up({playing: true})
-        })
-        audio.addEventListener('progress', () => {
-            up({buffered: buf(audio.duration, audio.buffered)})
-        })
-        audio.addEventListener('ratechange', () => console.log('ratechange'))
-        audio.addEventListener('seeked', () => console.log('seeked'))
-        audio.addEventListener('seeking', () => {
-            up({waiting: true})
-            console.log('*seeking')
-        })
-        audio.addEventListener('stalled', () => console.log('stalled'))
-        audio.addEventListener('suspend', () => console.log('suspend'))
-        audio.addEventListener('timeupdate', () => {
-            progress(audio.currentTime)
-        })
-        audio.addEventListener('volumechange', () => console.log('volumechange', audio.volume))
-        audio.addEventListener('waiting', () => {
-            up({waiting: true})
-            console.log('*waiting')
-        })
-
-        window.a = audio
-        return {audio}
-    },
     progress: currentTime => ({duration}) => ({
         currentTime,
         progress: Math.round(currentTime * 100 / duration),
     }),
-    set: ({src, artist, title}) => () => {
-        console.log('========== set', artist, title)
-        return {src, title, artist, autoplay: true}
+    src: ({src, artist, title}) => ({audio}) => {
+        console.log('========== set', artist, title, audio)
+        audio.src(src)
+        return {src, title, artist}
     },
-    play: () => ({ready, audio}) => {
-        if (ready) {
-            const promise = audio.play()
-            if (promise) {
-                promise
-          .then(() => {
-              console.log(' play ok')
-          })
-          .catch(err => {
-              console.log(' play.err', err)
-          })
-            }
-        }
+    play: seekTo => ({audio}) => {
+        console.log('what?', seekTo)
+        audio.play(seekTo)
     },
-    pause: () => ({ready, audio}) => {
-        if (ready) audio.pause()
+    pause: () => ({audio}) => {
+        audio.pause()
     },
-    stop: () => ({ready, audio}, {pause}) => {
-        if (ready) {
-            pause()
-            audio.currentTime = 0
-        }
+    stop: () => ({audio}) => {
+        audio.stop()
+    },
+    clear: () => ({audio}) => {
+        audio.src(undefined)
+        return {src: undefined}
+    },
+    mute: () => ({audio}) => audio.toggleMute(),
+    seek: e => ({audio}) => {
+        audio.seek(e.offsetX * 100 / e.target.offsetWidth)
+    },
+    setVolume: e => ({audio}) => {
+        audio.volume(e.offsetX / e.target.offsetWidth)
+    },
+    init: () => (_, actions) => {
+        setTimeout(() => {
+            actions.src(Playlist[1])
+            setTimeout(() => actions.play(30), 1000)
+        }, 500)
 
-        return {autoplay: false}
+        const audio = new Wdio()
+        audio.on(function(event) {
+            actions.up(event)
+        })
+        window.a = audio
+
+        return {audio}
     },
-    clear: () => () => ({src: null}),
-    seek: e => ({ready, audio}) => {
-        if (ready) audio.currentTime = audio.duration * (e.offsetX * 100 / e.target.offsetWidth) / 100
-    },
-    setVolume: e => () => ({volume: e.offsetX / e.target.offsetWidth}),
-    auto: () => (_, actions) => {
-        actions.set(Playlist[1])
-        setTimeout(() => actions.play(), 1000)
+    playPl: index => (_, actions) => {
+        actions.src(Playlist[index])
+        actions.play(80)
     },
 }
 
-const view = (state, {auto, set, play, pause, stop, seek, clear, initAudio, setVolume}) => 
-  <section className="section" oncreate={auto}>
+const view = (state, {init, playPl, play, pause, stop, seek, clear, setVolume, mute}) => 
+  <section className="section" oncreate={init}>
     <div className="container">
-      <h1 className="title">Player</h1>
+      <h1 className="title">Player {state.audio}</h1>
       <p className={state.waiting ? 'is-loading' : ''}>
         {state.artist} - {state.title}
       </p>
@@ -207,7 +136,11 @@ const view = (state, {auto, set, play, pause, stop, seek, clear, initAudio, setV
       </div>
       <progress class="progress is-small is-volume" value={state.volume} max="1.0" onclick={setVolume} />
       <p>
-        <button className="button" onclick={state.playing ? pause : play} disabled={state.waiting || !state.ready}>
+        <button
+          className="button"
+          onclick={() => (state.playing ? pause : play)()}
+          disabled={state.waiting || !state.ready}
+        >
           {state.playing ? 'pause' : 'play'}
         </button>
         <button className="button" onclick={stop} disabled={!state.ready}>
@@ -216,12 +149,14 @@ const view = (state, {auto, set, play, pause, stop, seek, clear, initAudio, setV
         <button className="button" onclick={clear} disabled={!state.src}>
           clear
         </button>
+        <button className="button" onclick={mute} disabled={!state.ready}>
+          {state.audio && (state.audio.state().muted ? 'un ' : '')}mute
+        </button>
       </p>
       <p>
-        <audio preload="metadata" src={state.src} oncreate={initAudio} volume={state.volume} />
         <ul>
-          {Playlist.map(m => 
-            <li onclick={() => set(m)}>
+          {Playlist.map((m, i) => 
+            <li onclick={() => playPl(i)}>
               {m.artist} - {m.title}
             </li>
           )}

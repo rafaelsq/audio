@@ -73,12 +73,10 @@ const Actions = {
         progress: Math.round(currentTime * 100 / duration),
     }),
     src: ({src, artist, title}) => ({audio}) => {
-        console.log('========== set', artist, title, audio)
         audio.src(src)
         return {src, title, artist}
     },
     play: seekTo => ({audio}) => {
-        console.log('what?', seekTo)
         audio.play(seekTo)
     },
     pause: () => ({audio}) => {
@@ -98,19 +96,38 @@ const Actions = {
     setVolume: e => ({audio}) => {
         audio.volume(e.offsetX / e.target.offsetWidth)
     },
-    init: () => (_, actions) => {
+    initcanvas: canvas => () => ({
+        canvas,
+        canvasctx: canvas.getContext("2d")
+    }),
+    init: () => (state, actions) => {
         setTimeout(() => {
-            actions.src(Playlist[1])
+            actions.src(Playlist[0])
             setTimeout(() => actions.play(30), 1000)
         }, 500)
 
         const audio = new Wdio()
         audio.on(function(event) {
             actions.up(event)
+            if (event.progress) {
+                actions.upProgress(event.progress)
+            } else if (event.duration) {
+                state.canvas.width = event.duration | 0
+            }
         })
         window.a = audio
 
         return {audio}
+    },
+    upProgress: progress => ({canvasctx, buffered, currentTime, waiting}) => {
+        buffered
+            .forEach((d, i) => {
+                canvasctx.beginPath()
+                canvasctx.strokeStyle = i == (currentTime | 0) ? waiting ? '#FF00FF' : '#CC3300' : d ? (waiting ? '#FFAAFF' : '#EFEFEF') : (waiting ? '#FF33FF' : '#9F9F9F')
+                canvasctx.moveTo(i, 0)
+                canvasctx.lineTo(i, 10)
+                canvasctx.stroke()
+            })
     },
     playPl: index => (_, actions) => {
         actions.src(Playlist[index])
@@ -118,7 +135,7 @@ const Actions = {
     },
 }
 
-const view = (state, {init, playPl, play, pause, stop, seek, clear, setVolume, mute}) => 
+const view = (state, {init, initcanvas, playPl, play, pause, stop, seek, clear, setVolume, mute}) =>
   <section className="section" oncreate={init}>
     <div className="container">
       <h1 className="title">Player {state.audio}</h1>
@@ -126,13 +143,11 @@ const view = (state, {init, playPl, play, pause, stop, seek, clear, setVolume, m
         {state.artist} - {state.title}
       </p>
       <div className="level">
-        <div className="leve-item">{secsToDisplay(state.currentTime)}&nbsp;</div>
+        <div className="leve-item is-timer">{secsToDisplay(state.currentTime)}&nbsp;</div>
         <div className="leve-item" onclick={seek}>
-          [{state.buffered
-            .map((d, i) => i == (state.currentTime | 0) ? state.waiting ? '?' : '>' : d ? '-' : '_')
-            .join('')}]
+            <canvas oncreate={initcanvas} className="cv" width="200" height="10" />
         </div>
-        <div className="leve-item">&nbsp;{secsToDisplay(state.duration)}</div>
+        <div className="leve-item is-timer">&nbsp;{secsToDisplay(state.duration)}</div>
       </div>
       <progress class="progress is-small is-volume" value={state.volume} max="1.0" onclick={setVolume} />
       <p>

@@ -17,6 +17,7 @@ export default function() {
     const _audio = new Audio()
     _audio.preload = 'metadata'
     _audio.volume = _default.volume
+    _audio.crossOrigin = 'anonymous'
 
     let _state = Object.assign({}, _default)
 

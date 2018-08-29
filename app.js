@@ -32,7 +32,7 @@ const Playlist = [
         title: 'Tumbalatum',
         img: '',
         src:
-      'https://phoenix-g5.sscdn.co/palcomp3/8/7/7/3/mckevinhooficial-whatsapp-audio-2016-09-27-at-102627-online-audio-convertercom-1c7b227e.mp3',
+            'https://phoenix-g5.sscdn.co/palcomp3/8/7/7/3/mckevinhooficial-whatsapp-audio-2016-09-27-at-102627-online-audio-convertercom-1c7b227e.mp3',
     },
     {
         artist: 'Koopa',
@@ -98,7 +98,7 @@ const Actions = {
     },
     initcanvas: canvas => () => ({
         canvas,
-        canvasctx: canvas.getContext("2d")
+        canvasctx: canvas.getContext('2d'),
     }),
     init: () => (state, actions) => {
         setTimeout(() => {
@@ -119,15 +119,25 @@ const Actions = {
 
         return {audio}
     },
-    upProgress: progress => ({canvasctx, buffered, currentTime, waiting}) => {
-        buffered
-            .forEach((d, i) => {
-                canvasctx.beginPath()
-                canvasctx.strokeStyle = i == (currentTime | 0) ? waiting ? '#FF00FF' : '#CC3300' : d ? (waiting ? '#FFAAFF' : '#EFEFEF') : (waiting ? '#FF33FF' : '#9F9F9F')
-                canvasctx.moveTo(i, 0)
-                canvasctx.lineTo(i, 10)
-                canvasctx.stroke()
-            })
+    upProgress: () => ({canvasctx, buffered, currentTime, waiting}) => {
+        buffered.forEach((d, i) => {
+            canvasctx.beginPath()
+            canvasctx.strokeStyle =
+                i == (currentTime | 0)
+                    ? waiting
+                        ? '#FF00FF'
+                        : '#CC3300'
+                    : d
+                        ? waiting
+                            ? '#FFAAFF'
+                            : '#EFEFEF'
+                        : waiting
+                            ? '#FF33FF'
+                            : '#9F9F9F'
+            canvasctx.moveTo(i, 0)
+            canvasctx.lineTo(i, 10)
+            canvasctx.stroke()
+        })
     },
     playPl: index => (_, actions) => {
         actions.src(Playlist[index])
@@ -135,50 +145,50 @@ const Actions = {
     },
 }
 
-const view = (state, {init, initcanvas, playPl, play, pause, stop, seek, clear, setVolume, mute}) =>
-  <section className="section" oncreate={init}>
-    <div className="container">
-      <h1 className="title">Player {state.audio}</h1>
-      <p className={state.waiting ? 'is-loading' : ''}>
-        {state.artist} - {state.title}
-      </p>
-      <div className="level">
-        <div className="leve-item is-timer">{secsToDisplay(state.currentTime)}&nbsp;</div>
-        <div className="leve-item" onclick={seek}>
-            <canvas oncreate={initcanvas} className="cv" width="200" height="10" />
+const view = (state, {init, initcanvas, playPl, play, pause, stop, seek, clear, setVolume, mute}) => 
+    <section className="section" oncreate={init}>
+        <div className="container">
+            <h1 className="title">Player {state.audio}</h1>
+            <p className={state.waiting ? 'is-loading' : ''}>
+                {state.artist} - {state.title}
+            </p>
+            <div className="level">
+                <div className="leve-item is-timer">{secsToDisplay(state.currentTime)}&nbsp;</div>
+                <div className="leve-item" onclick={seek}>
+                    <canvas oncreate={initcanvas} className="cv" width="200" height="10" />
+                </div>
+                <div className="leve-item is-timer">&nbsp;{secsToDisplay(state.duration)}</div>
+            </div>
+            <progress class="progress is-small is-volume" value={state.volume} max="1.0" onclick={setVolume} />
+            <p>
+                <button
+                    className="button"
+                    onclick={() => (state.playing ? pause : play).bind(state.audio)()}
+                    disabled={state.waiting || !state.ready}
+                >
+                    {state.playing ? 'pause' : 'play'}
+                </button>
+                <button className="button" onclick={stop} disabled={!state.ready}>
+                    stop
+                </button>
+                <button className="button" onclick={clear} disabled={!state.src}>
+                    clear
+                </button>
+                <button className="button" onclick={mute} disabled={!state.ready}>
+                    {state.muted ? 'un ' : ''}mute
+                </button>
+            </p>
+            <p>
+                <ul>
+                    {Playlist.map((m, i) => 
+                        <li onclick={() => playPl(i)}>
+                            {m.artist} - {m.title}
+                        </li>
+                    )}
+                </ul>
+            </p>
         </div>
-        <div className="leve-item is-timer">&nbsp;{secsToDisplay(state.duration)}</div>
-      </div>
-      <progress class="progress is-small is-volume" value={state.volume} max="1.0" onclick={setVolume} />
-      <p>
-        <button
-          className="button"
-          onclick={() => (state.playing ? pause : play)()}
-          disabled={state.waiting || !state.ready}
-        >
-          {state.playing ? 'pause' : 'play'}
-        </button>
-        <button className="button" onclick={stop} disabled={!state.ready}>
-          stop
-        </button>
-        <button className="button" onclick={clear} disabled={!state.src}>
-          clear
-        </button>
-        <button className="button" onclick={mute} disabled={!state.ready}>
-          {state.audio && (state.audio.state().muted ? 'un ' : '')}mute
-        </button>
-      </p>
-      <p>
-        <ul>
-          {Playlist.map((m, i) => 
-            <li onclick={() => playPl(i)}>
-              {m.artist} - {m.title}
-            </li>
-          )}
-        </ul>
-      </p>
-    </div>
-  </section>
+    </section>
 
 
 app(State, Actions, view, document.body)

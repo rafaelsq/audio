@@ -11,6 +11,7 @@ const _default = {
     waiting: null,
     volume: 0.4,
     muted: false,
+    ended: false,
 }
 
 export default class {
@@ -36,9 +37,11 @@ export default class {
         _audio.addEventListener('emptied', () => console.log('emptied'))
         _audio.addEventListener('ended', () => {
             this._reset()
+            this._up({ended: true})
         })
         _audio.addEventListener('error', err => {
             this._reset()
+            this._up({ended: true})
             console.error('*err', err)
         })
         _audio.addEventListener('loadeddata', () => console.log('loadeddata'))

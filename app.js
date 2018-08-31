@@ -51,10 +51,12 @@ const secsToDisplay = t => {
 const State = {
     audio: null,
 
+    index: null,
     artist: null,
     title: null,
     src: null,
 
+    // player.stats
     autoplay: false,
     buffered: [],
     currentTime: 0,
@@ -64,6 +66,7 @@ const State = {
     ready: false,
     waiting: null,
     volume: 0.2,
+    ended: false,
 }
 
 const Actions = {
@@ -101,23 +104,23 @@ const Actions = {
         canvasctx: canvas.getContext('2d'),
     }),
     init: () => (state, actions) => {
-        setTimeout(() => {
-            actions.src(Playlist[0])
-            setTimeout(() => actions.play(30), 1000)
-        }, 500)
-
         const audio = new Wdio()
-        audio.on(function(event) {
-            actions.up(event)
-            if (event.progress) {
-                actions.upProgress(event.progress)
-            } else if (event.duration) {
-                state.canvas.width = event.duration | 0
-            }
-        })
-        window.a = audio
+
+        audio.on(actions.upEvent)
 
         return {audio}
+    },
+    upEvent: st => (state, actions) => {
+        if (st.progress) actions.upProgress(st.progress)
+        if (st.duration) state.canvas.width = st.duration | 0
+        if (!state.ended && st.ended) {
+            st.index = state.index + 1
+            actions.src(Playlist[st.index])
+            actions.play()
+            st.ended = false
+        }
+
+        return st
     },
     upProgress: () => ({canvasctx, buffered, currentTime, waiting}) => {
         buffered.forEach((d, i) => {
@@ -142,6 +145,7 @@ const Actions = {
     playPl: index => (_, actions) => {
         actions.src(Playlist[index])
         actions.play(80)
+        return {index}
     },
 }
 
@@ -181,7 +185,7 @@ const view = (state, {init, initcanvas, playPl, play, pause, stop, seek, clear, 
             <p>
                 <ul>
                     {Playlist.map((m, i) => 
-                        <li onclick={() => playPl(i)}>
+                        <li onclick={() => playPl(i)} className={i === state.index ? 'has-text-primary' : ''}>
                             {m.artist} - {m.title}
                         </li>
                     )}

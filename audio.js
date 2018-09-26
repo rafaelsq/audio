@@ -45,12 +45,11 @@ export default class {
             console.error('*err', err)
         })
         _audio.addEventListener('loadeddata', () => console.log('loadeddata'))
-        _audio.addEventListener('loadedmetadata', () => {
-            this._up({ready: true})
-            this._onReady()
-        })
+        _audio.addEventListener('loadedmetadata', () => console.log('loadedmetadata'))
         _audio.addEventListener('loadstart', () => {
-            this._up({waiting: true})
+            const run = !this._state.ready
+            this._up({waiting: true, ready: true})
+            if (run) this._onReady()
         })
         _audio.addEventListener('pause', () => {
             this._up({playing: false})

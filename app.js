@@ -90,6 +90,11 @@ class PlaylistManager {
         this.state.playlist.index = -1
         this._emit(this.state)
     }
+
+    toggleRepeat() {
+        this.state.playlist.repeat = !this.state.playlist.repeat
+        this._emit(this.state)
+    }
 }
 
 class App extends React.Component {
@@ -166,6 +171,7 @@ const Playlist = ({actions, state}) =>
         <button onClick={() => actions.next()} disabled={state.index >= state.playlist.length - 1}>
             next
         </button>
+        <button onClick={() => actions.toggleRepeat()}>repeat: {state.repeat ? 'all' : 'no'}</button>
     </div>
 
 

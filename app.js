@@ -20,7 +20,7 @@ class PlaylistManager {
             playlist: {
                 index: -1,
                 playlist: [],
-                repeat: false,
+                repeat: true,
             },
         }
 
@@ -57,11 +57,12 @@ class PlaylistManager {
 
     next() {
         let index =
-            this._index + 1 > this.state.playlist.playlist.length
+            this.state.playlist.index + 1 >= this.state.playlist.playlist.length
                 ? this.state.playlist.repeat
                     ? 0
                     : this.state.playlist.index
                 : this.state.playlist.index + 1
+
         if (index != this.state.playlist.index) {
             this.playAt(index)
         }
@@ -128,77 +129,69 @@ class App extends React.Component {
                     },
                 }}
             >
-                <CPlayer />
-                <CPlayer />
+                {CPlayer.bind(this)()}
+                {CPlayer.bind(this)()}
                 <CPlaylist />
             </PlayerContext.Provider>
         )
     }
 }
 
-function CPlaylist() {
-    return (
-        <PlayerContext.Consumer>
-            {({state, actions}) => <Playlist actions={actions.playlist} state={state.playlist} />}
-        </PlayerContext.Consumer>
-    )
-}
+const CPlaylist = () =>
+    <PlayerContext.Consumer>
+        {({state, actions}) => <Playlist actions={actions.playlist} state={state.playlist} />}
+    </PlayerContext.Consumer>
 
-function CPlayer() {
-    return (
-        <PlayerContext.Consumer>
-            {({state, actions}) => <Player actions={actions.player} state={state.player} />}
-        </PlayerContext.Consumer>
-    )
-}
 
-function Playlist({actions, state}) {
-    return (
-        <div>
-            <h1>Playlist</h1>
-            <ul>
-                {state.playlist.map((m, i) =>
-                    <li onClick={() => actions.playAt(i)}>
-                        {i === state.index ? '*' : ''}
-                        {m.title}
-                    </li>
-                )}
-            </ul>
-            <button onClick={() => actions.prev()} disabled={!state.index}>
-                prev
-            </button>
-            <button onClick={() => actions.next()} disabled={state.index >= state.playlist.length - 1}>
-                next
-            </button>
+const CPlayer = () =>
+    <PlayerContext.Consumer>
+        {({state, actions}) => <Player actions={actions.player} state={state.player} />}
+    </PlayerContext.Consumer>
+
+
+const Playlist = ({actions, state}) =>
+    <div>
+        <h1>Playlist</h1>
+        <ul>
+            {state.playlist.map((m, i) =>
+                <li onClick={() => actions.playAt(i)}>
+                    {i === state.index ? '*' : ''}
+                    {m.title}
+                </li>
+            )}
+        </ul>
+        <button onClick={() => actions.prev()} disabled={!state.index}>
+            prev
+        </button>
+        <button onClick={() => actions.next()} disabled={state.index >= state.playlist.length - 1}>
+            next
+        </button>
+    </div>
+
+
+const Player = ({actions, state}) =>
+    <div className="player">
+        <h1>
+            Player {state.audio} {secsToDisplay(state.currentTime)}/{secsToDisplay(state.duration)}
+        </h1>
+        <div className="seek-bar" onClick={e => actions.seek(e.nativeEvent.offsetX * 100 / e.target.offsetWidth)}>
+            <div className={'progress' + (state.waiting ? ' wait' : '')} style={{width: state.progress + '%'}} />
         </div>
-    )
-}
+        <p>
+            <button
+                onClick={() => state.playing ? actions.pause() : actions.play()}
+                disabled={state.waiting || !state.ready}
+            >
+                {state.playing ? 'pause' : 'play'}
+            </button>
+            <button onClick={() => actions.stop()} disabled={!state.ready}>
+                stop
+            </button>
+            <button onClick={() => actions.toggleMute()} disabled={!state.ready}>
+                {state.muted ? 'un ' : ''}mute
+            </button>
+        </p>
+    </div>
 
-function Player({actions, state}) {
-    return (
-        <div className="player">
-            <h1>
-                Player {state.audio} {secsToDisplay(state.currentTime)}/{secsToDisplay(state.duration)}
-            </h1>
-            <div className="seek-bar" onClick={e => actions.seek(e.nativeEvent.offsetX * 100 / e.target.offsetWidth)}>
-                <div className={'progress' + (state.waiting ? ' wait' : '')} style={{width: state.progress + '%'}} />
-            </div>
-            <p>
-                <button
-                    onClick={() => state.playing ? actions.pause() : actions.play()}
-                    disabled={state.waiting || !state.ready}
-                >
-                    {state.playing ? 'pause' : 'play'}
-                </button>
-                <button onClick={() => actions.stop()} disabled={!state.ready}>
-                    stop
-                </button>
-                <button onClick={() => actions.toggleMute()} disabled={!state.ready}>
-                    {state.muted ? 'un ' : ''}mute
-                </button>
-            </p>
-        </div>
-    )
-}
 
 ReactDOM.render(<App />, document.getElementById('root'))

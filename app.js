@@ -114,11 +114,12 @@ class App extends React.Component {
         this._playlistManager.setPlaylist([
             {
                 title: 'Tribo da Periferia - Perdidos em nárnia',
-                url: 'https://griphon-g2.sscdn.co/palcomp3/7/d/4/4/tribodaperiferia-perdidos-em-narnia-638e8917.mp3',
+                url: 'https://65381g.ha.azioncdn.net/7/d/4/4/tribodaperiferia-perdidos-em-narnia-638e8917.mp3',
             },
             {
-                title: 'Koopa Tropas - Brain Damage',
-                url: 'https://pegasus-g4.sscdn.co/palcomp3/d/9/a/a/brain-damage-faixa-d07ce97a.mp3',
+                title: 'Tribo da Periferia - Alma de Pipa',
+                url:
+                    'https://65381g.ha.azioncdn.net/0/d/c/f/tribodaperiferia-tribo-da-periferia-alma-de-pipa-a6a0a218.mp3?',
             },
         ])
     }
@@ -194,7 +195,8 @@ const Player = ({actions, state}) =>
                 stop
             </button>
             <button onClick={() => actions.toggleMute()} disabled={!state.ready}>
-                {state.muted ? 'un ' : ''}mute
+                {state.muted ? 'un ' : ''}
+                mute
             </button>
         </p>
     </div>

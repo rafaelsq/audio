@@ -2,8 +2,8 @@
   "dependencies": {
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.7.0",
-    "bulma": "^0.7.1",
-    "hyperapp": "^1.2.5"
+    "bulma": "^0.7.4",
+    "hyperapp": "^1.2.9"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

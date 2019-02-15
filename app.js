@@ -21,6 +21,8 @@ class PlaylistManager {
                 index: -1,
                 playlist: [],
                 repeat: true,
+                hasPrev: false,
+                hasNext: false,
             },
         }
 
@@ -39,8 +41,15 @@ class PlaylistManager {
         })
     }
 
+    _updateStatePrevNext() {
+        this.state.playlist.hasNext = this.state.playlist.repeat
+            ? true
+            : this.state.playlist.index < this.state.playlist.playlist.length - 1
+        this.state.playlist.hasPrev = this.state.playlist.index > 0
+    }
     on(emitter) {
         this._emit = emitter
+        this._emit(this.state)
     }
 
     playerActions() {
@@ -49,6 +58,7 @@ class PlaylistManager {
 
     playAt(index) {
         this.state.playlist.index = index
+        this._updateStatePrevNext()
         this._emit(this.state)
 
         this._player.src(this.state.playlist.playlist[index].url)
@@ -76,23 +86,29 @@ class PlaylistManager {
     }
 
     setPlaylist(playlist) {
+        this._player.reset()
+        this.state.playlist.index = -1
         this.state.playlist.playlist = playlist
+        this._updateStatePrevNext()
         this._emit(this.state)
     }
 
     queue(music) {
         this.state.playlist.playlist.push(music)
+        this._updateStatePrevNext()
         this._emit(this.state)
     }
 
     clear() {
         this.state.playlist.playlist = []
         this.state.playlist.index = -1
+        this._updateStatePrevNext()
         this._emit(this.state)
     }
 
     toggleRepeat() {
         this.state.playlist.repeat = !this.state.playlist.repeat
+        this._updateStatePrevNext()
         this._emit(this.state)
     }
 }
@@ -110,18 +126,6 @@ class App extends React.Component {
 
     componentWillMount() {
         this._playlistManager.on(playlistState => this.setState({playlistState}))
-
-        this._playlistManager.setPlaylist([
-            {
-                title: 'Tribo da Periferia - Perdidos em nárnia',
-                url: 'https://65381g.ha.azioncdn.net/7/d/4/4/tribodaperiferia-perdidos-em-narnia-638e8917.mp3',
-            },
-            {
-                title: 'Tribo da Periferia - Alma de Pipa',
-                url:
-                    'https://65381g.ha.azioncdn.net/0/d/c/f/tribodaperiferia-tribo-da-periferia-alma-de-pipa-a6a0a218.mp3?',
-            },
-        ])
     }
 
     render() {
@@ -166,10 +170,50 @@ const Playlist = ({actions, state}) =>
                 </li>
             )}
         </ul>
-        <button onClick={() => actions.prev()} disabled={!state.index}>
+        <button
+            onClick={() => {
+                actions.setPlaylist([
+                    {
+                        title: 'Tribo da Periferia - Perdidos em nárnia',
+                        url: 'https://65381g.ha.azioncdn.net/7/d/4/4/tribodaperiferia-perdidos-em-narnia-638e8917.mp3',
+                    },
+                    {
+                        title: 'Tribo da Periferia - Alma de Pipa',
+                        url:
+                            'https://65381g.ha.azioncdn.net/0/d/c/f/tribodaperiferia-tribo-' +
+                            'da-periferia-alma-de-pipa-a6a0a218.mp3?',
+                    },
+                ])
+                actions.playAt(0)
+            }}
+        >
+            Tribo
+        </button>
+        <button
+            onClick={() => {
+                actions.setPlaylist([
+                    {
+                        title: 'Henrique e Juliano - Quem Pegou, Pegou',
+                        url:
+                            'https://65381g.ha.azioncdn.net/3/c/e/4/henriqueejulianooficial-quem-' +
+                            'pegou-pegou-b0f3933d.mp3',
+                    },
+                    {
+                        title: 'Henrique e Juliano - Três Corações',
+                        url:
+                            'https://65381g.ha.azioncdn.net/3/5/a/0/henriqueejulianooficial-tres' +
+                            '-coracoes-c62a4fa4.mp3',
+                    },
+                ])
+                actions.playAt(0)
+            }}
+        >
+            H&J
+        </button>
+        <button onClick={() => actions.prev()} disabled={!state.hasPrev}>
             prev
         </button>
-        <button onClick={() => actions.next()} disabled={state.index >= state.playlist.length - 1}>
+        <button onClick={() => actions.next()} disabled={!state.hasNext}>
             next
         </button>
         <button onClick={() => actions.toggleRepeat()}>repeat: {state.repeat ? 'all' : 'no'}</button>

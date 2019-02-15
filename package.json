@@ -1,7 +1,10 @@
 {
   "dependencies": {
     "babel-env": "^2.4.1",
-    "react": "^16.0.0",
-    "react-dom": "^16.4.2"
+    "react": "^16.8.2",
+    "react-dom": "^16.8.2"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3"
   }
 }

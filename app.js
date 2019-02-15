@@ -19,26 +19,25 @@ const Playlist = [
         artist: 'Tribo da Periferia',
         title: 'Perdido em Nárnia',
         img: 'https://studiosol-a.akamaihd.net/tb/palcomp3-discografia/f/5/a/5/3e469e4fd9574ebe87ccca9bcec1a520.jpg',
-        src: 'https://griphon-g2.sscdn.co/palcomp3/7/d/4/4/tribodaperiferia-perdidos-em-narnia-638e8917.mp3',
+        src: 'https://65381g.ha.azioncdn.net/7/d/4/4/tribodaperiferia-perdidos-em-narnia-638e8917.mp3',
     },
     {
-        artist: 'Koopa Tropas',
-        title: 'Brain Damage',
-        img: 'https://studiosol-a.akamaihd.net/tb/palcomp3-discografia/7/e/4/6/7e69a25516194bb5933eb6b74b667674.jpg',
-        src: 'https://pegasus-g4.sscdn.co/palcomp3/d/9/a/a/brain-damage-faixa-d07ce97a.mp3',
+        artist: 'Tribo da Periferia',
+        title: 'Alma de Pipa',
+        img: 'https://studiosol-a.akamaihd.net/tb/palcomp3-discografia/f/5/a/5/3e469e4fd9574ebe87ccca9bcec1a520.jpg',
+        src: 'https://65381g.ha.azioncdn.net/0/d/c/f/tribodaperiferia-tribo-da-periferia-alma-de-pipa-a6a0a218.mp3?',
     },
     {
-        artist: 'Kevinho',
-        title: 'Tumbalatum',
+        artist: 'Henrique e Juliano',
+        title: 'Quem Pegou, Pegou',
         img: '',
-        src:
-            'https://phoenix-g5.sscdn.co/palcomp3/8/7/7/3/mckevinhooficial-whatsapp-audio-2016-09-27-at-102627-online-audio-convertercom-1c7b227e.mp3',
+        src: 'https://65381g.ha.azioncdn.net/3/c/e/4/henriqueejulianooficial-quem-pegou-pegou-b0f3933d.mp3',
     },
     {
-        artist: 'Koopa',
-        title: 'Falling Away',
-        img: 'https://studiosol-a.akamaihd.net/tb/palcomp3-discografia/1/1/4/a/821cf14de3ed4af18ff93e2554d96b2b.jpg',
-        src: 'https://phoenix-g5.sscdn.co/palcomp3/c/d/6/6/koopa-falling-away.mp3',
+        artist: 'Henrique e Juliano',
+        title: 'Três Corações',
+        img: '',
+        src: 'https://65381g.ha.azioncdn.net/3/5/a/0/henriqueejulianooficial-tres-coracoes-c62a4fa4.mp3',
     },
 ]
 
@@ -157,11 +156,17 @@ const view = (state, {init, initcanvas, playPl, play, pause, stop, seek, clear, 
                 {state.artist} - {state.title}
             </p>
             <div className="level">
-                <div className="leve-item is-timer">{secsToDisplay(state.currentTime)}&nbsp;</div>
+                <div className="leve-item is-timer">
+                    {secsToDisplay(state.currentTime)}
+                    &nbsp;
+                </div>
                 <div className="leve-item" onclick={seek}>
                     <canvas oncreate={initcanvas} className="cv" width="200" height="10" />
                 </div>
-                <div className="leve-item is-timer">&nbsp;{secsToDisplay(state.duration)}</div>
+                <div className="leve-item is-timer">
+                    &nbsp;
+                    {secsToDisplay(state.duration)}
+                </div>
             </div>
             <progress class="progress is-small is-volume" value={state.volume} max="1.0" onclick={setVolume} />
             <p>
@@ -179,7 +184,8 @@ const view = (state, {init, initcanvas, playPl, play, pause, stop, seek, clear, 
                     clear
                 </button>
                 <button className="button" onclick={mute} disabled={!state.ready}>
-                    {state.muted ? 'un ' : ''}mute
+                    {state.muted ? 'un ' : ''}
+                    mute
                 </button>
             </p>
             <p>

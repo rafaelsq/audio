@@ -36,11 +36,11 @@ export default class {
         })
         _audio.addEventListener('emptied', () => console.log('emptied'))
         _audio.addEventListener('ended', () => {
-            this._reset()
+            this.reset()
             this._up({ended: true})
         })
         _audio.addEventListener('error', err => {
-            this._reset()
+            this.reset()
             this._up({ended: true})
             console.error('*err', err)
         })
@@ -93,10 +93,6 @@ export default class {
         if (this._state.autoplay) this.play()
     }
 
-    _reset() {
-        this._up(_default)
-    }
-
     _progress(currentTime) {
         this._up({
             currentTime,
@@ -116,9 +112,15 @@ export default class {
 
     // public methods
 
+    reset() {
+        if (!this._audio.paused) this._audio.pause()
+        this._up(_default)
+    }
+
     src(src) {
-        this._reset()
+        this.reset()
         this._audio.src = src
+        this._audio.load() // safari, idevices
     }
 
     on(fn) {
@@ -129,7 +131,7 @@ export default class {
         if (this._state.ready) {
             const promise = this._audio.play()
             if (promise) {
-                promise.then(function() {}).catch(function(err) {
+                promise.then(function() {}).catch(err => {
                     this._up({playing: false})
                     console.log(' play.err', err)
                 })

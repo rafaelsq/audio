@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
-import Audio from './audio'
+import Audio from './node_modules/audio/audio.js'
 
 const PlayerContext = React.createContext({})
 const PlaylistContext = React.createContext({})

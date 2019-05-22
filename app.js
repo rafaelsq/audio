@@ -1,5 +1,5 @@
 import {h, app} from 'hyperapp'
-import Wdio from './audio'
+import Wdio from './node_modules/audio/audio.js'
 
 // parcel hmr
 if (module.hot) {

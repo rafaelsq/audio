@@ -3,7 +3,8 @@ import * as ReactDOM from 'react-dom'
 
 import Audio from './audio'
 
-const PlayerContext = React.createContext({state: {playlist: {}, player: {}}, actions: {}})
+const PlayerContext = React.createContext({})
+const PlaylistContext = React.createContext({})
 
 const secsToDisplay = t => {
     const m = t / 60 | 0
@@ -26,7 +27,8 @@ class PlaylistManager {
             },
         }
 
-        this._emit = () => {}
+        this._onPlayer = () => {}
+        this._onPlaylist = () => {}
 
         this._player.on(state => {
             let ended = this.state.player.ended
@@ -37,7 +39,7 @@ class PlaylistManager {
 
             this.state.player = {...this.state.player, ...state, ended}
 
-            this._emit(this.state)
+            this._onPlayer(this.state.player)
         })
     }
 
@@ -47,9 +49,13 @@ class PlaylistManager {
             : this.state.playlist.index < this.state.playlist.playlist.length - 1
         this.state.playlist.hasPrev = this.state.playlist.index > 0
     }
-    on(emitter) {
-        this._emit = emitter
-        this._emit(this.state)
+    onPlayer(emitter) {
+        this._onPlayer = emitter
+        this._onPlayer(this.state.player)
+    }
+    onPlaylist(emitter) {
+        this._onPlaylist = emitter
+        this._onPlaylist(this.state.playlist)
     }
 
     playerActions() {
@@ -59,7 +65,7 @@ class PlaylistManager {
     playAt(index) {
         this.state.playlist.index = index
         this._updateStatePrevNext()
-        this._emit(this.state)
+        this._onPlaylist(this.state.playlist)
 
         this._player.src(this.state.playlist.playlist[index].url)
         this._player.play()
@@ -90,74 +96,107 @@ class PlaylistManager {
         this.state.playlist.index = -1
         this.state.playlist.playlist = playlist
         this._updateStatePrevNext()
-        this._emit(this.state)
+        this._onPlaylist(this.state.playlist)
     }
 
     queue(music) {
         this.state.playlist.playlist.push(music)
         this._updateStatePrevNext()
-        this._emit(this.state)
+        this._onPlaylist(this.state.playlist)
     }
 
     clear() {
         this.state.playlist.playlist = []
         this.state.playlist.index = -1
         this._updateStatePrevNext()
-        this._emit(this.state)
+        this._onPlaylist(this.state.playlist)
     }
 
     toggleRepeat() {
         this.state.playlist.repeat = !this.state.playlist.repeat
         this._updateStatePrevNext()
-        this._emit(this.state)
+        this._onPlaylist(this.state.playlist)
     }
 }
+
+const _playlistManager = new PlaylistManager()
 
 class App extends React.Component {
     constructor(props) {
         super(props)
-
-        this._playlistManager = new PlaylistManager()
-
-        this.state = {
-            playlistState: {player: {}, playlist: {}},
-        }
-    }
-
-    componentWillMount() {
-        this._playlistManager.on(playlistState => this.setState({playlistState}))
     }
 
     render() {
         return (
-            <PlayerContext.Provider
-                value={{
-                    state: this.state.playlistState,
-                    actions: {
-                        player: this._playlistManager.playerActions(),
-                        playlist: this._playlistManager,
-                    },
-                }}
-            >
-                {CPlayer.bind(this)()}
-                {CPlayer.bind(this)()}
-                <CPlaylist />
+            <PlaylistProvider actions={_playlistManager} onState={_playlistManager.onPlaylist.bind(_playlistManager)}>
+                <PlayerProvider
+                    actions={_playlistManager.playerActions()}
+                    onState={_playlistManager.onPlayer.bind(_playlistManager)}
+                >
+                    <h1>Player</h1>
+                    <div>
+                        {CPlayer.bind(this)()}
+                        {CPlayer.bind(this)()}
+                    </div>
+                    <div>
+                        <h2>Playlist</h2>
+                        <CPlaylist />
+                    </div>
+                </PlayerProvider>
+            </PlaylistProvider>
+        )
+    }
+}
+
+class PlayerProvider extends React.Component {
+    constructor(props) {
+        super(props)
+
+        this.state = {}
+    }
+
+    componentWillMount() {
+        this.props.onState(state => this.setState(state))
+    }
+
+    render() {
+        return (
+            <PlayerContext.Provider value={{state: this.state, actions: this.props.actions}}>
+                {/* rendered for each state change */ <span />}
+                {this.props.children}
             </PlayerContext.Provider>
         )
     }
 }
 
-const CPlaylist = () =>
-    <PlayerContext.Consumer>
-        {({state, actions}) => <Playlist actions={actions.playlist} state={state.playlist} />}
-    </PlayerContext.Consumer>
+class PlaylistProvider extends React.Component {
+    constructor(props) {
+        super(props)
 
+        this.state = {}
+    }
 
-const CPlayer = () =>
-    <PlayerContext.Consumer>
-        {({state, actions}) => <Player actions={actions.player} state={state.player} />}
-    </PlayerContext.Consumer>
+    componentWillMount() {
+        this.props.onState(state => this.setState(state))
+    }
 
+    render() {
+        return (
+            <PlaylistContext.Provider value={{state: this.state, actions: this.props.actions}}>
+                {/* rendered for each state change */ <span />}
+                {this.props.children}
+            </PlaylistContext.Provider>
+        )
+    }
+}
+
+const CPlaylist = () => {
+    return <PlaylistContext.Consumer>{Playlist}</PlaylistContext.Consumer>
+}
+
+const CPlayer = () => {
+    return <PlayerContext.Consumer>{Player}</PlayerContext.Consumer>
+}
 
 const Playlist = ({actions, state}) =>
     <div>

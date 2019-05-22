@@ -119,34 +119,27 @@ class PlaylistManager {
     }
 }
 
-const _playlistManager = new PlaylistManager()
+const App = () =>
+    <PlayerProviderWrap manager={new PlaylistManager()}>
+        <h1>Player</h1>
+        <div>
+            {CPlayer.bind(this)()}
+            {CPlayer.bind(this)()}
+        </div>
+        <div>
+            <h2>Playlist</h2>
+            <CPlaylist />
+        </div>
+    </PlayerProviderWrap>
 
-class App extends React.Component {
-    constructor(props) {
-        super(props)
-    }
 
-    render() {
-        return (
-            <PlaylistProvider actions={_playlistManager} onState={_playlistManager.onPlaylist.bind(_playlistManager)}>
-                <PlayerProvider
-                    actions={_playlistManager.playerActions()}
-                    onState={_playlistManager.onPlayer.bind(_playlistManager)}
-                >
-                    <h1>Player</h1>
-                    <div>
-                        {CPlayer.bind(this)()}
-                        {CPlayer.bind(this)()}
-                    </div>
-                    <div>
-                        <h2>Playlist</h2>
-                        <CPlaylist />
-                    </div>
-                </PlayerProvider>
-            </PlaylistProvider>
-        )
-    }
-}
+const PlayerProviderWrap = props =>
+    <PlaylistProvider actions={props.manager} onState={props.manager.onPlaylist.bind(props.manager)}>
+        <PlayerProvider actions={props.manager.playerActions()} onState={props.manager.onPlayer.bind(props.manager)}>
+            {props.children}
+        </PlayerProvider>
+    </PlaylistProvider>
+
 
 class PlayerProvider extends React.Component {
     constructor(props) {

@@ -37,3 +37,14 @@ Examples; [React](https://github.com/rafaelsq/audio/tree/react), [HyperApp](http
 </html>
 ```
 
+## Yarn
+
+`$ yarn add https://github.com/rafaelsq/audio`
+```js
+import Audio from "audio"
+
+const audio = new Audio()
+audio.on(state => console.log("new state:", state))
+audio.src("MP3_URL")
+audio.play()
+```

@@ -2,7 +2,6 @@
   "dependencies": {
     "audio": "https://github.com/rafaelsq/audio",
     "babel-env": "^2.4.1",
-    "github.com": "^1.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
   },

@@ -1,37 +1,35 @@
 Arguments: 
-  /usr/bin/node /usr/share/yarn/bin/yarn.js add node_modules
+  /usr/bin/node /usr/share/yarn/bin/yarn.js add github.com/rafaelsq/audio
 
 PATH: 
-  /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/rafael/.fzf/bin:/usr/local/go/bin:/bin:/home/rafael/.yarn/bin:/home/rafael/.bin:/home/rafael/.platform-tools/:/home/rafael/go/bin/
+  /home/rafael/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/local/go/bin:/bin:/home/rafael/.yarn/bin:/home/rafael/.bin:/home/rafael/.platform-tools/:/home/rafael/go/bin/:/home/rafael/.local/bin/:/home/rafael/.fzf/bin
 
 Yarn version: 
-  1.16.0
+  1.19.1
 
 Node version: 
-  8.10.0
+  10.15.2
 
 Platform: 
   linux x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/node_modules: Not found
-      at Request.params.callback [as _callback] (/usr/share/yarn/lib/cli.js:66091:18)
-      at Request.self.callback (/usr/share/yarn/lib/cli.js:129590:22)
-      at emitTwo (events.js:126:13)
-      at Request.emit (events.js:214:7)
-      at Request.<anonymous> (/usr/share/yarn/lib/cli.js:130562:10)
-      at emitOne (events.js:116:13)
-      at Request.emit (events.js:211:7)
-      at IncomingMessage.<anonymous> (/usr/share/yarn/lib/cli.js:130484:12)
-      at Object.onceWrapper (events.js:313:30)
-      at emitNone (events.js:111:20)
+  Error: https://registry.yarnpkg.com/github.com%2frafaelsq/audio: Request "https://registry.yarnpkg.com/github.com%2frafaelsq/audio" returned a 405
+      at Request.params.callback [as _callback] (/usr/share/yarn/lib/cli.js:66935:18)
+      at Request.self.callback (/usr/share/yarn/lib/cli.js:140564:22)
+      at Request.emit (events.js:189:13)
+      at Request.<anonymous> (/usr/share/yarn/lib/cli.js:141536:10)
+      at Request.emit (events.js:189:13)
+      at IncomingMessage.<anonymous> (/usr/share/yarn/lib/cli.js:141458:12)
+      at Object.onceWrapper (events.js:277:13)
+      at IncomingMessage.emit (events.js:194:15)
+      at endReadableNT (_stream_readable.js:1103:12)
+      at process._tickCallback (internal/process/next_tick.js:63:19)
 
 npm manifest: 
   {
     "dependencies": {
-      "audio": "https://github.com/rafaelsq/audio",
       "babel-env": "^2.4.1",
-      "github.com": "^1.0.0",
       "react": "^16.8.6",
       "react-dom": "^16.8.6"
     },
@@ -99,10 +97,6 @@ Lockfile:
   async-each@^1.0.0:
     version "1.0.1"
     resolved "https://registry.yarnpkg.com/async-each/-/async-each-1.0.1.tgz#19d386a1d9edc6e7c1c85d388aedbcc56d33602d"
-  
-  "audio@https://github.com/rafaelsq/audio":
-    version "0.0.0"
-    resolved "https://github.com/rafaelsq/audio#de3c84f99d854dedc064ec07405046bee9017e6d"
   
   babel-cli@^6.24.0:
     version "6.26.0"
@@ -1040,11 +1034,6 @@ Lockfile:
       string-width "^1.0.1"
       strip-ansi "^3.0.1"
       wide-align "^1.1.0"
-  
-  github.com@^1.0.0:
-    version "1.0.0"
-    resolved "https://registry.yarnpkg.com/github.com/-/github.com-1.0.0.tgz#baf7c86674bc7854d433cd449bf14eff740ddfc7"
-    integrity sha512-P2hWCR/AktAyIehGLhhQ571rnfuAUVLGAm9BfsseJ3n4Yn2+0Q16m+y7qtvZnbqkwuRjxHr+DmmqHmBnWmlL3w==
   
   glob-base@^0.3.0:
     version "0.3.0"
